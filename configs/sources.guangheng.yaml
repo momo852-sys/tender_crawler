@@ -1,0 +1,102 @@
+business_profile: beijing_guangheng_accounting_firm
+min_relevance_score: 2
+
+include_keywords:
+  - 审计
+  - 财务审计
+  - 年报审计
+  - 决算审计
+  - 竣工财务决算
+  - 财务决算
+  - 预算绩效
+  - 绩效评价
+  - 绩效评估
+  - 内部控制
+  - 内控评价
+  - 清产核资
+  - 资产清查
+  - 会计师事务所
+  - 注册会计师
+  - 财务咨询
+  - 税务咨询
+  - 专项债
+  - 债券
+  - 发债
+  - 上市公司
+  - 证券服务
+  - 证券备案
+  - IPO
+  - 并购重组
+
+exclude_keywords:
+  - 食材
+  - 物业
+  - 保洁
+  - 保安
+  - 车辆维修
+  - 家具
+  - 医疗设备
+  - 办公设备
+  - 服装
+
+sources:
+  - name: ccgp_central_open_tender
+    enabled: true
+    type: ccgp_category
+    list_url: "https://www.ccgp.gov.cn/cggg/zygg/gkzb/index.htm"
+    base_url: "https://www.ccgp.gov.cn/cggg/zygg/gkzb/"
+    page_url_pattern: "https://www.ccgp.gov.cn/cggg/zygg/gkzb/index_{index}.htm"
+    pages: 3
+    category: "中国政府采购网/中央公告/公开招标"
+
+  - name: ccgp_local_open_tender
+    enabled: true
+    type: ccgp_category
+    list_url: "https://www.ccgp.gov.cn/cggg/dfgg/gkzb/index.htm"
+    base_url: "https://www.ccgp.gov.cn/cggg/dfgg/gkzb/"
+    page_url_pattern: "https://www.ccgp.gov.cn/cggg/dfgg/gkzb/index_{index}.htm"
+    pages: 3
+    category: "中国政府采购网/地方公告/公开招标"
+
+  - name: ccgp_central_competitive_consultation
+    enabled: true
+    type: ccgp_category
+    list_url: "https://www.ccgp.gov.cn/cggg/zygg/jzxcs/index.htm"
+    base_url: "https://www.ccgp.gov.cn/cggg/zygg/jzxcs/"
+    page_url_pattern: "https://www.ccgp.gov.cn/cggg/zygg/jzxcs/index_{index}.htm"
+    pages: 3
+    category: "中国政府采购网/中央公告/竞争性磋商"
+
+  - name: ccgp_local_competitive_consultation
+    enabled: true
+    type: ccgp_category
+    list_url: "https://www.ccgp.gov.cn/cggg/dfgg/jzxcs/index.htm"
+    base_url: "https://www.ccgp.gov.cn/cggg/dfgg/jzxcs/"
+    page_url_pattern: "https://www.ccgp.gov.cn/cggg/dfgg/jzxcs/index_{index}.htm"
+    pages: 3
+    category: "中国政府采购网/地方公告/竞争性磋商"
+
+  # 中国招标投标公共服务平台页面经常由动态检索页承载。
+  # 拿到稳定的检索 URL 或接口后，把 enabled 改成 true，并补 selectors。
+  - name: cebpubservice_search_placeholder
+    enabled: false
+    type: static_list
+    list_url: "https://www.cebpubservice.com/"
+    base_url: "https://www.cebpubservice.com/"
+    list_item_selector: ".list li"
+    title_selector: "a"
+    link_selector: "a"
+    category: "中国招标投标公共服务平台"
+
+  # 湖南省公共资源交易中心官网会跳转/指向不同交易子平台。
+  # 实际采集建议优先接湖南省公共资源交易服务平台或湖南政府采购网的公告列表页。
+  - name: hunan_ggzy_placeholder
+    enabled: false
+    type: static_list
+    list_url: "https://ggzy.hunan.gov.cn/"
+    base_url: "https://ggzy.hunan.gov.cn/"
+    list_item_selector: ".list li"
+    title_selector: "a"
+    link_selector: "a"
+    province: "湖南"
+    category: "湖南省公共资源交易中心"

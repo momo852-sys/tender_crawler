@@ -1,0 +1,283 @@
+openapi: 3.0.3
+info:
+  title: Tender Crawler Agent
+  version: 0.1.0
+  description: Search tender notices and trigger crawler jobs for Dify agents.
+servers:
+  - url: http://127.0.0.1:8010
+paths:
+  /health:
+    get:
+      operationId: health
+      summary: Health check
+      responses:
+        "200":
+          description: Service status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+  /tenders/search:
+    get:
+      operationId: searchTenders
+      summary: Search tender notices
+      parameters:
+        - name: keyword
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Keyword to match title, summary, buyer, or raw text.
+        - name: province
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: city
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - name: min_relevance_score
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+          description: Minimum relevance score for Guangheng accounting-firm opportunities.
+      responses:
+        "200":
+          description: Tender search results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Tender"
+  /crawl/run:
+    post:
+      operationId: runTenderCrawl
+      summary: Trigger one crawler run
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                config_path:
+                  type: string
+                  default: configs/sources.example.yaml
+      responses:
+        "200":
+          description: Crawl results by source
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CrawlResult"
+  /workflow/run:
+    post:
+      operationId: runTenderWorkflow
+      summary: Crawl tender sites, export CSV, and optionally upload to Dify knowledge base
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_url:
+                  type: string
+                  nullable: true
+                  description: User-provided tender site URL. Reserved for custom per-site crawling.
+                config_path:
+                  type: string
+                  default: configs/sources.guangheng.yaml
+                keyword:
+                  type: string
+                  nullable: true
+                  description: Optional keyword for filtering stored tenders.
+                limit:
+                  type: integer
+                  default: 100
+                  minimum: 1
+                  maximum: 1000
+                min_relevance_score:
+                  type: integer
+                  default: 2
+                  minimum: 0
+                export_csv:
+                  type: boolean
+                  default: true
+                upload_to_dify:
+                  type: boolean
+                  default: false
+      responses:
+        "200":
+          description: Workflow result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowResponse"
+  /external-knowledge/retrieval:
+    post:
+      operationId: externalKnowledgeRetrieval
+      summary: Retrieve tender records for Dify external knowledge API
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                knowledge_id:
+                  type: string
+                query:
+                  type: string
+                retrieval_setting:
+                  type: object
+                  required:
+                    - top_k
+                    - score_threshold
+                  properties:
+                    top_k:
+                      type: integer
+                      default: 5
+                    score_threshold:
+                      type: number
+                      default: 0
+                metadata_condition:
+                  type: object
+                  nullable: true
+      responses:
+        "200":
+          description: External knowledge retrieval response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  records:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        content:
+                          type: string
+                        score:
+                          type: number
+                        title:
+                          type: string
+                        metadata:
+                          type: object
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    Tender:
+      type: object
+      properties:
+        id:
+          type: integer
+        source:
+          type: string
+        source_url:
+          type: string
+        title:
+          type: string
+        summary:
+          type: string
+          nullable: true
+        province:
+          type: string
+          nullable: true
+        city:
+          type: string
+          nullable: true
+        buyer:
+          type: string
+          nullable: true
+        agency:
+          type: string
+          nullable: true
+        budget:
+          type: string
+          nullable: true
+        publish_date:
+          type: string
+          nullable: true
+        deadline:
+          type: string
+          nullable: true
+        category:
+          type: string
+          nullable: true
+        business_profile:
+          type: string
+          nullable: true
+        matched_keywords:
+          type: string
+          nullable: true
+        relevance_score:
+          type: integer
+        raw_text:
+          type: string
+          nullable: true
+    CrawlResult:
+      type: object
+      properties:
+        source:
+          type: string
+        found:
+          type: integer
+        inserted:
+          type: integer
+        updated:
+          type: integer
+        errors:
+          type: array
+          items:
+            type: string
+    WorkflowResponse:
+      type: object
+      properties:
+        crawl_results:
+          type: array
+          items:
+            $ref: "#/components/schemas/CrawlResult"
+        exported_csv:
+          type: string
+          nullable: true
+        dify_uploaded:
+          type: boolean
+        dify_message:
+          type: string
+          nullable: true
+        total_candidates:
+          type: integer

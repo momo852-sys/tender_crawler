@@ -1,0 +1,13 @@
+sources:
+  - name: sample_static_page
+    enabled: false
+    type: static_list
+    list_url: "https://example.com/tenders"
+    base_url: "https://example.com"
+    list_item_selector: ".tender-item"
+    title_selector: ".title"
+    link_selector: "a"
+    date_selector: ".date"
+    province: "示例省份"
+    city: "示例城市"
+    category: "工程招标"
